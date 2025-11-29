@@ -1,5 +1,4 @@
 learning_rate,warmup_ratio,rank,alpha,dropout,target_modules,trial_id,generation,accuracy
-0.0001833992894755159,2.602850523811933,1.4892395093286783,3.188357979381366,2.4297911436383077,"['q_lin', 'v_lin', 'ffn.lin1', 'ffn.lin2']",20,1,0.8215
 0.0002,0.0,24.0,96.0,0.0,"['q_lin', 'v_lin', 'ffn.lin1', 'ffn.lin2']",21,1,0.8915
 0.00017951411786392064,0.0,24.0,96.0,0.0,"['q_lin', 'v_lin', 'ffn.lin1', 'ffn.lin2']",22,1,0.8845
 8.565595134328385e-05,0.0,24.0,96.0,0.0,"['q_lin', 'v_lin', 'ffn.lin1', 'ffn.lin2']",23,1,0.852
