@@ -135,7 +135,7 @@ While theoretically inefficient in high-dimensional spaces, RS is a strong basel
 % \noindent We propose a Real-Coded Genetic Algorithm (RCGA) for optimising LoRA hyperparameters within a mixed discrete-continuous search space. Unlike standard Binary GAs, which suffer from Hamming cliffs, where small mutations to the bit string can cause drastic changes in parameter values, disrupting the search, RCGA preserves the property of locality. This is crucial for parameters like Rank and Alpha, which possess an ordinal relationship (i.e the categories have a meaningful order but the distance between them is not equal; $r=4 < r=8 < r=16$). By operating in a continuous representation and mapping to the nearest discrete index, the algorithm can exploit local gradients and explore the solution space "between" parents. We can now describe the genetic operators implementing this approach:
 
 \subsection{Algorithm 2: RCGA BLX-$\alpha$}
-\noindent We propose a Real-Coded Genetic Algorithm (RCGA) for optimising LoRA hyperparameters. Unlike binary GAs, which face Hamming cliff issues where small bit-flips cause large parameter jumps, RCGA operates directly on the parameter vector. This is crucial for LoRA, where parameters like Rank ($r$) and Alpha ($\alpha$) possess an ordinal relationship ($r=4 < r=8 < r=16$). RCGA allows the optimiser to exploit these local gradients.
+\noindent We propose a Real-Coded Genetic Algorithm (RCGA) for optimising LoRA hyperparameters. While standard binary GAs often struggle with Hamming cliffs—where small mutations in the binary representation cause drastic jumps in the parameter value—RCGA operates directly on the parameter vector. This is particularly advantageous for LoRA, where key parameters like Rank ($r$) and Alpha ($\alpha$) possess an inherent ordinal relationship ($r=4 < r=8 < r=16$). By treating these as continuous variables during evolution, RCGA allows the optimiser to exploit local gradients and infer performance trends between discrete steps, leading to more efficient convergence in the mixed-integer search space.
 
 % \subsubsection{Crossover (BLX-$\alpha$)}
 % \noindent To balance exploration and exploitation, we utilised the Blend Crossover (BLX-$\alpha$) operator. For two parent genes $x_1$ and $x_2$ (where $x_1 < x_2$), the offspring $y$ is sampled uniformly from the interval:
@@ -149,14 +149,14 @@ To balance exploration and exploitation, we utilise the Blend Crossover (BLX-$\a
 \begin{equation}
     y \sim U(x_1 - I \cdot \alpha, x_2 + I \cdot \alpha), \quad \text{where } I = x_2 - x_1
 \end{equation}
-We selected $\alpha = 0.5$, allowing the search to extend slightly beyond the parents boundaries to preserve population diversity.
+We selected $\alpha = 0.5$, allowing the search to extend slightly beyond the parents boundaries to preserve population diversity. This interval extension is critical for escaping local optima in the continuous learning rate dimension.
 
 % \subsubsection{Mutation}
 % \noindent We applied a random reset mutation with a probability of $0.1$. If a gene is selected for mutation, it is replaced by a new random value sampled uniformly from the initialisation range of that specific parameter.
 
 % rank_index = np.clip(int(round(self.genes[2])), 0, len(RANK_OPTIONS) - 1)
 \subsubsection{Mutation and Repair}
-A random reset mutation is applied with a probability of $0.1$ per gene to prevent premature convergence. A repair mechanism is strictly enforced after every operation: continuous genes (Learning Rate) are clipped to $[1e-5, 2e-4]$, and discrete genes are rounded to the nearest integer index to map back to valid LoRA configurations (e.g., an index of $1.6$ for Rank maps to index 2, corresponding to $r=8$).
+A random reset mutation is applied with a probability of $0.1$ per gene to prevent premature convergence. A repair mechanism is strictly enforced after every operation: continuous genes (Learning Rate) are clipped to $[1e-5, 2e-4]$, and discrete genes are rounded to the nearest integer index to map back to valid LoRA configurations. This allows the algorithm to explore a continuous landscape while respecting the discrete nature of the model architecture.
 
 % # Elitism
 % offspring.append(Individual(best_individual.genes.copy()))
@@ -164,7 +164,7 @@ A random reset mutation is applied with a probability of $0.1$ per gene to preve
 % A tournament selection mechanism was used to choose parents for the next generation. To ensure convergence stability, we implemented elitism, where the single best individual from the current generation is copied unchanged to the next generation.
 
 \subsubsection{Elitism}
-To ensure monotonic performance improvement, we implement strict elitism. The single best individual from generation $g$ is copied unchanged to generation $g+1$, ensuring the highest validation accuracy found so far is never lost due to stochastic crossover or mutation.
+To ensure monotonic performance improvement, we implement strict elitism. The single best individual from generation $g$ is copied unchanged to generation $g+1$. This guarantees that the highest validation accuracy found so far is never lost due to stochastic crossover or mutation, a crucial feature given the high cost of each fitness evaluation.
 
 \begin{algorithm}[htbp]
 \caption{RCGA with BLX-$\alpha$ Crossover}
@@ -295,7 +295,7 @@ SHADE has demonstrated superior performance on the CEC2014 benchmark suite and v
 
 % \noindent All algorithms are initialised with a population of 20 with individuals being evaluated at the start. Offsprings and updates are generated from the starting population and undergo four generational updates, totalling for 100 evaluations. We have chosen these small values (relative to literature) for population and generations as the search space itself has been constrained due to the computational intensiveness of the task at hand. Three epochs are used during training for all algorithms to reinforce fairness, and limit evaluation time. P100 GPUs are used in training for their speed and availability. Finally, the top five configurations are taken from each algorithm and are trained on three unique seeds. The results shown on Table ~\ref{tab:shade_comparison} and Table ~\ref{tab:params} are from the best performing configuration of each algorithm.
 
-\noindent The baseline Random Search was allocated a budget of 20 trials. The metaheuristic algorithms (RCGA, SHADE, PSO) were initialised with a population of 20 and evolved for 5 generations (100 evaluations total). This budget constraint mimics real-world scenarios where foundation model fine-tuning is computationally expensive. Finally, to verify robustness, the top performing configurations were re-evaluated using 3 different random seeds to report the mean accuracy and standard deviation. The results shown on Table ~\ref{tab:shade_comparison} and Table ~\ref{tab:params} are from the best performing configuration of each algorithm.
+\noindent The baseline Random Search was allocated a budget of 20 trials. The metaheuristic algorithms (RCGA, SHADE, PSO) were initialised with a population of 20 and evolved for four generations (100 evaluations total). We have chosen these small values (relative to literature) for population and generations, as the search space itself has been constrained due to the computational intensiveness of the task at hand. This budget constraint mimics real-world scenarios where foundation model fine-tuning is computationally expensive. Finally, to verify robustness, the top performing configurations were re-evaluated using 3 different random seeds to report the mean accuracy and standard deviation. The results shown on Table ~\ref{tab:shade_comparison} and Table ~\ref{tab:params} are from the best performing configuration of each algorithm.
 
 \begin{table}[htbp]
     \centering
